@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.prose-purple {
+  --tw-prose-headings: theme('colors.purple.900');
+  --tw-prose-links: theme('colors.purple.600');
+  --tw-prose-bold: theme('colors.purple.900');
+  --tw-prose-quotes: theme('colors.purple.900');
+  --tw-prose-quote-borders: theme('colors.purple.300');
+  --tw-prose-counters: theme('colors.purple.600');
+  --tw-prose-bullets: theme('colors.purple.400');
+  --tw-prose-hr: theme('colors.purple.200');
+  --tw-prose-th-borders: theme('colors.purple.300');
+  --tw-prose-td-borders: theme('colors.purple.200');
+}
+
+.prose-neutral {
+  --tw-prose-body: theme('colors.gray.700');
+  --tw-prose-headings: theme('colors.gray.900');
+  --tw-prose-links: theme('colors.gray.700');
+  --tw-prose-bold: theme('colors.gray.900');
+  --tw-prose-quotes: theme('colors.gray.900');
+  --tw-prose-quote-borders: theme('colors.gray.300');
+  --tw-prose-counters: theme('colors.gray.600');
+  --tw-prose-bullets: theme('colors.gray.400');
+  --tw-prose-hr: theme('colors.gray.200');
+  --tw-prose-th-borders: theme('colors.gray.300');
+  --tw-prose-td-borders: theme('colors.gray.200');
+}
