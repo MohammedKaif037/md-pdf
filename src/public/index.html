@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown to PDF Converter</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Markdown to PDF Converter</h1>
+
+        <!-- Markdown Input -->
+        <textarea id="markdownInput" placeholder="Enter your markdown here..."></textarea>
+
+        <!-- Live Preview Section -->
+        <div class="preview-section">
+            <h2>Preview</h2>
+            <div id="markdownPreview" class="markdown-preview"></div>
+        </div>
+
+        <!-- Generate PDF Button -->
+        <button id="generatePdfBtn">Generate PDF</button>
+
+        <!-- Success Message -->
+        <p id="successMessage" class="hidden">PDF generated successfully! Check your downloads.</p>
+    </div>
+
+    <!-- Include external libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
