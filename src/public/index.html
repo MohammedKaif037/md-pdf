@@ -1,36 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markdown to PDF Converter</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown to PDF</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 2rem;
+      color: #333;
+    }
+    textarea {
+      width: 80%;
+      height: 150px;
+      margin-bottom: 20px;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      resize: vertical;
+    }
+    .controls {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .controls button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+    .controls button.export-pdf {
+      background-color: #008CBA;
+      color: white;
+    }
+    .preview {
+      width: 80%;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: white;
+      overflow-wrap: break-word;
+      color: black; /* Default black text */
+      box-sizing: border-box;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    /* Prevent page breaks inside block elements */
+    p, ul, ol, li, blockquote, h1, h2, h3, h4, h5, h6 {
+      page-break-inside: avoid;
+    }
+
+    /* Ensure headers always start on a new page if there isn't enough space */
+    @media print {
+      h1, h2, h3, h4, h5, h6 {
+        page-break-before: always;
+      }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      textarea {
+        width: 95%;
+      }
+      .preview {
+        width: 95%;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Markdown to PDF Converter</h1>
+<div class="container">
+  <h1>Markdown to PDF Converter</h1>
 
-        <!-- Markdown Input -->
-        <textarea id="markdownInput" placeholder="Enter your markdown here..."></textarea>
+  <!-- Textarea for Markdown input -->
+  <textarea id="markdownInput" placeholder="Enter your Markdown here..."></textarea>
 
-        <!-- Live Preview Section -->
-        <div class="preview-section">
-            <h2>Preview</h2>
-            <div id="markdownPreview" class="markdown-preview"></div>
-        </div>
+  <!-- Controls for export -->
+  <div class="controls">
+    <button class="export-pdf" onclick="exportToPDF()">Export to PDF</button>
+  </div>
 
-        <!-- Generate PDF Button -->
-        <button id="generatePdfBtn">Generate PDF</button>
+  <!-- Preview area -->
+  <div id="preview" class="preview"></div>
+</div>
 
-        <!-- Success Message -->
-        <p id="successMessage" class="hidden">PDF generated successfully! Check your downloads.</p>
-    </div>
+<script>
+  // Function to render Markdown
+  function renderMarkdown() {
+    const markdownText = document.getElementById('markdownInput').value;
+    const htmlContent = marked.parse(markdownText);
+    document.getElementById('preview').innerHTML = htmlContent;
+  }
 
-    <!-- Include external libraries -->
-   
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.12/marked.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="script.js"></script>
+  // Event listener for Markdown input changes
+  document.getElementById('markdownInput').addEventListener('input', renderMarkdown);
+
+  // Function to export the preview as a PDF
+  function exportToPDF() {
+    const element = document.getElementById('preview');
+
+    // Export to PDF
+    html2pdf()
+      .from(element)
+      .set({
+        margin: [10, 5], // Margins: [top, right, bottom, left]
+        filename: 'Markdown-to-PDF.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, scrollX: 0, scrollY: 0 }, // Fix right-side space issue
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      })
+      .save();
+  }
+
+  // Initial render of Markdown
+  renderMarkdown();
+</script>
 </body>
 </html>
