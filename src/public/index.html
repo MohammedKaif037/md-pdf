@@ -108,7 +108,7 @@
 
   <!-- Buttons for inserting Markdown elements -->
   <div class="controls">
-    <button class="insert-btn" onclick="formatSelectedText('# ', 'Heading')">Heading</button>
+    <button class="insert-btn" onclick="cycleHeading()">Heading</button>
     <button class="insert-btn" onclick="formatSelectedText('**', '', '**')">Bold</button>
     <button class="insert-btn" onclick="formatSelectedText('*', '', '*')">Italic</button>
     <button class="insert-btn" onclick="formatSelectedText('> ', '')">Blockquote</button>
@@ -179,10 +179,11 @@
     const cursorPosition = textarea.selectionStart;
     const currentValue = textarea.value;
 
-    // Check if the current line starts with a heading
+    // Find the start of the current line
     const currentLineStart = currentValue.lastIndexOf('\n', cursorPosition - 1) + 1;
     const currentLine = currentValue.substring(currentLineStart, cursorPosition);
 
+    // Check if the current line starts with a heading
     let newHeadingPrefix = '';
     if (/^(#+)\s/.test(currentLine)) {
       // If the current line is already a heading, replace it with the next level
@@ -201,6 +202,7 @@
       'Heading Text' +
       currentValue.substring(cursorPosition);
 
+    // Update the textarea value
     textarea.value = newValue;
 
     // Move the cursor to the end of the inserted text
