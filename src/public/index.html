@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Markdown to PDF</title>
+  <title>Notes Making App</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
@@ -49,8 +49,12 @@
       font-size: 16px;
       transition: background-color 0.3s ease;
     }
-    .controls button.export-pdf {
+    .controls button.insert-btn {
       background-color: #008CBA;
+      color: white;
+    }
+    .controls button.export-pdf {
+      background-color: #4CAF50;
       color: white;
     }
     .preview {
@@ -65,19 +69,16 @@
       max-width: 100%;
       overflow-x: hidden;
     }
-
     /* Prevent page breaks inside block elements */
     p, ul, ol, li, blockquote, h1, h2, h3, h4, h5, h6 {
       page-break-inside: avoid;
     }
-
     /* Ensure headers always start on a new page if there isn't enough space */
     @media print {
       h1, h2, h3, h4, h5, h6 {
         page-break-before: always;
       }
     }
-
     /* Responsive design */
     @media (max-width: 768px) {
       textarea {
@@ -91,15 +92,25 @@
 </head>
 <body>
 <div class="container">
-  <h1>Markdown to PDF Converter</h1>
+  <h1>Notes Making App</h1>
 
-  <!-- Textarea for Markdown input -->
-  <textarea id="markdownInput" placeholder="Enter your Markdown here..."></textarea>
-
-  <!-- Controls for export -->
+  <!-- Buttons for inserting Markdown elements -->
   <div class="controls">
+    <button class="insert-btn" onclick="cycleHeading()">Heading</button>
+    <button class="insert-btn" onclick="insertMarkdown('**', 'Bold Text', '**')">Bold</button>
+    <button class="insert-btn" onclick="insertMarkdown('*', 'Italic Text', '*')">Italic</button>
+    <button class="insert-btn" onclick="insertMarkdown('> ', 'Blockquote')">Blockquote</button>
+    <button class="insert-btn" onclick="insertMarkdown('1. ', 'Ordered List Item')">Ordered List</button>
+    <button class="insert-btn" onclick="insertMarkdown('- ', 'Unordered List Item')">Unordered List</button>
+    <button class="insert-btn" onclick="insertMarkdown('`', 'Code', '`')">Code</button>
+    <button class="insert-btn" onclick="insertMarkdown('---', '')">Horizontal Rule</button>
+    <button class="insert-btn" onclick="insertMarkdown('[Link](https://www.example.com)', 'Link')">Link</button>
+    <button class="insert-btn" onclick="insertMarkdown('![Alt Text](image-url)', 'Image')">Image</button>
     <button class="export-pdf" onclick="exportToPDF()">Export to PDF</button>
   </div>
+
+  <!-- Textarea for Markdown input -->
+  <textarea id="markdownInput" placeholder="Enter your notes here..."></textarea>
 
   <!-- Preview area -->
   <div id="preview" class="preview"></div>
@@ -116,6 +127,77 @@
   // Event listener for Markdown input changes
   document.getElementById('markdownInput').addEventListener('input', renderMarkdown);
 
+  // Function to insert Markdown syntax into the textarea
+  function insertMarkdown(prefix, placeholder, suffix = '') {
+    const textarea = document.getElementById('markdownInput');
+    const cursorPosition = textarea.selectionStart;
+    const currentValue = textarea.value;
+
+    // Insert the Markdown syntax at the cursor position
+    const newValue =
+      currentValue.substring(0, cursorPosition) +
+      prefix +
+      placeholder +
+      suffix +
+      currentValue.substring(cursorPosition);
+
+    textarea.value = newValue;
+
+    // Move the cursor to the end of the inserted text
+    textarea.setSelectionRange(
+      cursorPosition + prefix.length,
+      cursorPosition + prefix.length + placeholder.length
+    );
+
+    // Re-render the preview
+    renderMarkdown();
+  }
+
+  // Function to cycle through heading levels
+  let headingLevel = 1;
+  function cycleHeading() {
+    const headings = ['# ', '## ', '### ', '#### ', '##### ', '###### '];
+    const textarea = document.getElementById('markdownInput');
+    const cursorPosition = textarea.selectionStart;
+    const currentValue = textarea.value;
+
+    // Check if the current line starts with a heading
+    const currentLineStart = currentValue.lastIndexOf('\n', cursorPosition - 1) + 1;
+    const currentLine = currentValue.substring(currentLineStart, cursorPosition);
+
+    let newHeadingPrefix = '';
+    if (/^(#+)\s/.test(currentLine)) {
+      // If the current line is already a heading, replace it with the next level
+      const currentHeadingLevel = currentLine.match(/^(#+)/)[1].length;
+      const nextLevel = (currentHeadingLevel % 6) + 1; // Cycle through 1-6
+      newHeadingPrefix = headings[nextLevel - 1];
+    } else {
+      // If not a heading, start with level 1
+      newHeadingPrefix = headings[headingLevel - 1];
+    }
+
+    // Replace or insert the new heading
+    const newValue =
+      currentValue.substring(0, currentLineStart) +
+      newHeadingPrefix +
+      'Heading Text' +
+      currentValue.substring(cursorPosition);
+
+    textarea.value = newValue;
+
+    // Move the cursor to the end of the inserted text
+    textarea.setSelectionRange(
+      currentLineStart + newHeadingPrefix.length,
+      currentLineStart + newHeadingPrefix.length + 'Heading Text'.length
+    );
+
+    // Update heading level for next click
+    headingLevel = (headingLevel % 6) + 1;
+
+    // Re-render the preview
+    renderMarkdown();
+  }
+
   // Function to export the preview as a PDF
   function exportToPDF() {
     const element = document.getElementById('preview');
@@ -125,7 +207,7 @@
       .from(element)
       .set({
         margin: [10, 5], // Margins: [top, right, bottom, left]
-        filename: 'Markdown-to-PDF.pdf',
+        filename: 'Notes.pdf',
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, scrollX: 0, scrollY: 0 }, // Fix right-side space issue
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
