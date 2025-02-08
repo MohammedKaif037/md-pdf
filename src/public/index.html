@@ -69,16 +69,19 @@
       max-width: 100%;
       overflow-x: hidden;
     }
+
     /* Prevent page breaks inside block elements */
     p, ul, ol, li, blockquote, h1, h2, h3, h4, h5, h6 {
       page-break-inside: avoid;
     }
+
     /* Ensure headers always start on a new page if there isn't enough space */
     @media print {
       h1, h2, h3, h4, h5, h6 {
         page-break-before: always;
       }
     }
+
     /* Responsive design */
     @media (max-width: 768px) {
       textarea {
@@ -88,6 +91,15 @@
         width: 95%;
       }
     }
+
+    /* Fix right-side empty space in PDF */
+    .pdf-content {
+      width: 100%;
+      max-width: 600px; /* Limit content width for better alignment */
+      margin: 0 auto; /* Center content horizontally */
+      padding: 20px;
+      box-sizing: border-box;
+    }
   </style>
 </head>
 <body>
@@ -96,16 +108,17 @@
 
   <!-- Buttons for inserting Markdown elements -->
   <div class="controls">
-    <button class="insert-btn" onclick="cycleHeading()">Heading</button>
-    <button class="insert-btn" onclick="insertMarkdown('**', 'Bold Text', '**')">Bold</button>
-    <button class="insert-btn" onclick="insertMarkdown('*', 'Italic Text', '*')">Italic</button>
-    <button class="insert-btn" onclick="insertMarkdown('> ', 'Blockquote')">Blockquote</button>
-    <button class="insert-btn" onclick="insertMarkdown('1. ', 'Ordered List Item')">Ordered List</button>
-    <button class="insert-btn" onclick="insertMarkdown('- ', 'Unordered List Item')">Unordered List</button>
-    <button class="insert-btn" onclick="insertMarkdown('`', 'Code', '`')">Code</button>
-    <button class="insert-btn" onclick="insertMarkdown('---', '')">Horizontal Rule</button>
-    <button class="insert-btn" onclick="insertMarkdown('[Link](https://www.example.com)', 'Link')">Link</button>
-    <button class="insert-btn" onclick="insertMarkdown('![Alt Text](image-url)', 'Image')">Image</button>
+    <button class="insert-btn" onclick="formatSelectedText('# ', 'Heading')">Heading</button>
+    <button class="insert-btn" onclick="formatSelectedText('**', '', '**')">Bold</button>
+    <button class="insert-btn" onclick="formatSelectedText('*', '', '*')">Italic</button>
+    <button class="insert-btn" onclick="formatSelectedText('> ', '')">Blockquote</button>
+    <button class="insert-btn" onclick="formatSelectedText('1. ', '')">Ordered List</button>
+    <button class="insert-btn" onclick="formatSelectedText('- ', '')">Unordered List</button>
+    <button class="insert-btn" onclick="formatSelectedText('`', '', '`')">Code</button>
+    <button class="insert-btn" onclick="formatSelectedText('---', '')">Horizontal Rule</button>
+    <button class="insert-btn" onclick="formatSelectedText('[Link](https://www.example.com)', '')">Link</button>
+    <button class="insert-btn" onclick="formatSelectedText('![Alt Text](image-url)', '')">Image</button>
+    <input type="text" id="filenameInput" placeholder="Enter PDF filename" style="padding: 5px; margin-right: 10px;">
     <button class="export-pdf" onclick="exportToPDF()">Export to PDF</button>
   </div>
 
@@ -113,7 +126,7 @@
   <textarea id="markdownInput" placeholder="Enter your notes here..."></textarea>
 
   <!-- Preview area -->
-  <div id="preview" class="preview"></div>
+  <div id="preview" class="preview pdf-content"></div>
 </div>
 
 <script>
@@ -127,26 +140,31 @@
   // Event listener for Markdown input changes
   document.getElementById('markdownInput').addEventListener('input', renderMarkdown);
 
-  // Function to insert Markdown syntax into the textarea
-  function insertMarkdown(prefix, placeholder, suffix = '') {
+  // Function to format selected text
+  function formatSelectedText(prefix, placeholder = '', suffix = '') {
     const textarea = document.getElementById('markdownInput');
-    const cursorPosition = textarea.selectionStart;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
     const currentValue = textarea.value;
 
-    // Insert the Markdown syntax at the cursor position
-    const newValue =
-      currentValue.substring(0, cursorPosition) +
-      prefix +
-      placeholder +
-      suffix +
-      currentValue.substring(cursorPosition);
+    // Get the selected text
+    const selectedText = currentValue.substring(start, end);
 
+    // Wrap the selected text with the provided prefix and suffix
+    const newValue =
+      currentValue.substring(0, start) +
+      prefix +
+      (selectedText || placeholder) + // Use placeholder if no text is selected
+      suffix +
+      currentValue.substring(end);
+
+    // Update the textarea value
     textarea.value = newValue;
 
     // Move the cursor to the end of the inserted text
     textarea.setSelectionRange(
-      cursorPosition + prefix.length,
-      cursorPosition + prefix.length + placeholder.length
+      start + prefix.length,
+      start + prefix.length + (selectedText || placeholder).length
     );
 
     // Re-render the preview
@@ -201,13 +219,15 @@
   // Function to export the preview as a PDF
   function exportToPDF() {
     const element = document.getElementById('preview');
+    const filenameInput = document.getElementById('filenameInput').value || 'Notes'; // Default filename
+    const filename = `${filenameInput}.pdf`;
 
     // Export to PDF
     html2pdf()
       .from(element)
       .set({
         margin: [10, 5], // Margins: [top, right, bottom, left]
-        filename: 'Notes.pdf',
+        filename: filename,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, scrollX: 0, scrollY: 0 }, // Fix right-side space issue
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
