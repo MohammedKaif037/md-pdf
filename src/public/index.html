@@ -213,29 +213,37 @@
 
   // Function to export the preview as a PDF
   function exportToPDF() {
-    const element = document.getElementById('preview');
-    const filenameInput = document.getElementById('filenameInput').value || 'Notes'; // Default filename
-    const filename = `${filenameInput}.pdf`;
+  const element = document.getElementById('preview');
+  const filenameInput = document.getElementById('filenameInput').value || 'Notes'; // Default filename
+  const filename = `${filenameInput}.pdf`;
 
-    // Dynamically calculate the height of the content
-    const contentHeight = element.scrollHeight;
-
-    // Export to PDF
-    html2pdf()
-      .from(element)
-      .set({
-        margin: [10, 5], // Margins: [top, right, bottom, left]
-        filename: filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, scrollX: 0, scrollY: 0 }, // Fix right-side space issue
-        jsPDF: {
-          unit: 'mm',
-          format: [210, contentHeight / 3.78], // Width = A4 width (210mm), Height = dynamic based on content
-          orientation: 'portrait'
-        }
-      })
-      .save();
-  }
+  // Export to PDF with text preservation
+  html2pdf()
+    .from(element)
+    .set({
+      margin: [10, 5], // Margins: [top, right, bottom, left]
+      filename: filename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { 
+        scale: 2, 
+        scrollX: 0, 
+        scrollY: 0,
+        useCORS: true, // Enable cross-origin images if needed
+        logging: true, // Enable logging for debugging
+        allowTaint: true, // Allow tainted images if necessary
+        letterRendering: true, // Improve text rendering
+      },
+      jsPDF: {
+        unit: 'mm',
+        format: 'a4', // Use A4 format
+        orientation: 'portrait',
+      },
+      // Ensure text is preserved as text
+      enableLinks: true, // Enable hyperlinks
+      pagebreak: { mode: 'avoid-all' }, // Avoid unnecessary page breaks
+    })
+    .save();
+}
 
   // Initial render of Markdown
   renderMarkdown();
